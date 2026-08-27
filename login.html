@@ -144,7 +144,6 @@
         // then hand off to index.html (which auto-decrypts). No plaintext password lives here.
         const SALT = "31c292b3d78180c3e26926df4589dab1";
         const EXPECTED = "519e17bd36ca91f5ca78ed40f7af2fdd50127ed61c78d28233bb635d181f1e19";
-        const REMEMBER_DAYS = 1;
 
         const _enc = new TextEncoder();
         const _hex = b => Array.from(new Uint8Array(b)).map(x => x.toString(16).padStart(2, "0")).join("");
@@ -168,13 +167,12 @@
             let hashed;
             try { hashed = await hashPassword(input.value, SALT); } catch { hashed = null; }
             if (hashed === EXPECTED) {
-                // remember-me (localStorage) so index.html and every page auto-decrypts
-                try {
-                    localStorage.setItem("staticrypt_passphrase", hashed);
-                    localStorage.setItem("staticrypt_expiration", (Date.now() + REMEMBER_DAYS * 86400000).toString());
-                } catch {}
-                // session password so pages auto-decrypt even if localStorage is blocked
+                // Per-tab session only: pages auto-decrypt while navigating within this tab,
+                // but closing the tab (or reloading) clears this and re-prompts. We deliberately
+                // do NOT write a long-term localStorage "remember me".
                 try { sessionStorage.setItem("staticrypt_session_password", input.value); } catch {}
+                // clear any stale long-term credential from earlier versions
+                try { localStorage.removeItem("staticrypt_passphrase"); localStorage.removeItem("staticrypt_expiration"); } catch {}
                 window.location.href = "./index.html";
             } else {
                 error.classList.add("show");
