@@ -1,5 +1,6 @@
 # Keep unpublished drafts out of the built site.
 exclude:
+  - blog-archive
   - drafts
   - password_template.html
   - README.md
