@@ -2,18 +2,13 @@
 <html class="staticrypt-html">
 <head>
     <script>
-    // Auth lifetime: per-tab session. A reload (or a fresh/closed-reopened tab) re-prompts;
-    // clicking links within the site does not. StatiCrypt reads sessionStorage on load,
-    // so we clear that session credential ONLY when this load is a reload.
+    // Auth lifetime: per-tab session. Reloads and clicking links within the site keep you
+    // logged in (sessionStorage); closing the tab clears it, so reopening re-prompts.
+    // We only make sure no long-term "remember me" survives a tab close.
     (function () {
       try {
-        // never rely on long-term remember-me
         localStorage.removeItem("staticrypt_passphrase");
         localStorage.removeItem("staticrypt_expiration");
-        var nav = (performance.getEntriesByType && performance.getEntriesByType("navigation")[0]) || null;
-        var isReload = nav ? nav.type === "reload"
-                           : (performance.navigation && performance.navigation.type === 1);
-        if (isReload) sessionStorage.removeItem("staticrypt_session_password");
       } catch (e) {}
     })();
     </script>
