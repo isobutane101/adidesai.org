@@ -170,7 +170,7 @@
                 // Per-tab session only: pages auto-decrypt while navigating within this tab,
                 // but closing the tab (or reloading) clears this and re-prompts. We deliberately
                 // do NOT write a long-term localStorage "remember me".
-                try { sessionStorage.setItem("staticrypt_session_password", input.value); } catch {}
+                try { sessionStorage.setItem("staticrypt_session_password", input.value); sessionStorage.setItem("staticrypt_hb", String(Date.now())); } catch {}
                 // clear any stale long-term credential from earlier versions
                 try { localStorage.removeItem("staticrypt_passphrase"); localStorage.removeItem("staticrypt_expiration"); } catch {}
                 window.location.href = "./index.html";

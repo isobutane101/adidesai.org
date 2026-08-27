@@ -2,13 +2,28 @@
 <html class="staticrypt-html">
 <head>
     <script>
-    // Auth lifetime: per-tab session. Reloads and clicking links within the site keep you
-    // logged in (sessionStorage); closing the tab clears it, so reopening re-prompts.
-    // We only make sure no long-term "remember me" survives a tab close.
+    // Auth lifetime: per-tab session that ends when the tab is actually closed.
+    // A heartbeat timestamp is refreshed every few seconds while this tab is open.
+    // On load, if the previous heartbeat is stale (the tab was closed) or missing,
+    // the saved password is cleared so the site re-prompts. Reloads and in-site link
+    // clicks are near-instant, so their heartbeat is fresh and you stay logged in.
+    // (This survives browser "reopen closed tab"/session-restore, which restores
+    // sessionStorage but not the passage of time.)
     (function () {
       try {
         localStorage.removeItem("staticrypt_passphrase");
         localStorage.removeItem("staticrypt_expiration");
+        var HB = "staticrypt_hb", GRACE = 6000, now = Date.now();
+        var prior = parseInt(sessionStorage.getItem(HB) || "0", 10);
+        if (!prior || (now - prior) > GRACE) {
+          sessionStorage.removeItem("staticrypt_session_password");
+        }
+        var beat = function () { try { sessionStorage.setItem(HB, String(Date.now())); } catch (e) {} };
+        beat();
+        setInterval(beat, 3000);
+        window.addEventListener("pagehide", beat);
+        window.addEventListener("visibilitychange", beat);
+        window.addEventListener("focus", beat);
       } catch (e) {}
     })();
     </script>
