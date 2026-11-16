@@ -2,5 +2,4 @@
 exclude:
   - blog-archive
   - drafts
-  - password_template.html
   - README.md
